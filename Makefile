@@ -32,7 +32,7 @@ update:
 
 #
 ## Packaging
-package: lint # test
+package: lint test
 	npm pack
 
 publish: package
