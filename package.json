@@ -7,7 +7,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wpkong/node-red-contrib-feed.git"
+    "url": "git+https://gitlab.com/demsking/node-red-contrib-feedparser-extended.git"
   },
   "license": "Apache-2.0",
   "keywords": [
@@ -27,9 +27,9 @@
     "node": ">=20"
   },
   "bugs": {
-    "url": "https://github.com/wpkong/node-red-contrib-feed/issues"
+    "url": "https://gitlab.com/demsking/node-red-contrib-feedparser-extended/issues"
   },
-  "homepage": "https://github.com/wpkong/node-red-contrib-feed#readme",
+  "homepage": "https://gitlab.com/demsking/node-red-contrib-feedparser-extended#readme",
   "main": "feedparse.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
