@@ -1,5 +1,7 @@
 # Node-RED Feed Parser Plus
 
+[![Buy me a beer](https://img.shields.io/badge/Buy%20me-a%20beer-1f425f.svg)](https://www.buymeacoffee.com/demsking)
+
 An enhanced and modernized fork of [node-red-contrib-feedparser-x](https://github.com/wpkong/node-red-contrib-feedparser-x).
 
 This version introduces better flexibility, improved developer experience, and
