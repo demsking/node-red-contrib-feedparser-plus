@@ -2,7 +2,7 @@
 
 An enhanced and modernized fork of [node-red-contrib-feedparser-x](https://github.com/wpkong/node-red-contrib-feedparser-x).
 
-This version introduces better flexibility, improved developer experience, and 
+This version introduces better flexibility, improved developer experience, and
 persistent tracking of seen articles using Redis context storage.
 
 ## Key Features
@@ -40,7 +40,7 @@ contextStorage: {
 }
 ```
 
-> **Note**: `node-red-context-redis` is no longer published on npm. Install it 
+> **Note**: `node-red-context-redis` is no longer published on npm. Install it
 > directly via Git:
 >
 > ```bash
@@ -94,9 +94,12 @@ The node provides runtime feedback via its status indicator:
 - Requires Node.js 20+
 - Compatible with Node-RED 3.x+
 
+## Contribute
+
+Please follow [CONTRIBUTING.md](./CONTRIBUTING.md).
+
 ## License
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License.
 You may obtain a copy of the License at [LICENSE](./LICENSE).
-

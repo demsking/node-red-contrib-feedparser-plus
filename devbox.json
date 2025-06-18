@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.10.5/.schema/devbox.schema.json",
+  "packages": [
+    "tmux@latest",
+    "gitmux@latest",
+    "tmuxinator@latest",
+    "gnumake@latest",
+    "pre-commit@latest",
+    "editorconfig-checker@latest",
+    "nodejs@20",
+    "jq@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "pre-commit install -f"
+    ],
+    "scripts": {}
+  }
+}

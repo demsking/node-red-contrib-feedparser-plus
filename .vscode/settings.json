@@ -1,0 +1,29 @@
+{
+  "editor.formatOnPaste": false,
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
+  "editor.tabSize": 2,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  },
+  "eslint.format.enable": true,
+  "eslint.lintTask.enable": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "files.exclude": {
+    "**/.devbox": true,
+    "**/.directory": true,
+    "**/.poetry": true,
+    "**/.coverage": true,
+    "**/.direnv": true,
+    "**/.nix-node": true,
+    "**/.ruff_cache": true,
+    "**/.venv": true,
+    "**/.pytest_cache": true,
+    "**/*.egg-info": true,
+    "**/__pycache__": true,
+    "**/dist": true
+  }
+}

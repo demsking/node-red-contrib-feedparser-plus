@@ -1,4 +1,10 @@
 node_modules/
-.DS_Store
-.idea
+.nix-node/
+.devbox/
+.nyc_output/
+.coverage/
+coverage/
+.directory
+*.log
 *.tgz
+*.kate-swp
