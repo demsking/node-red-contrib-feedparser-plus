@@ -1,7 +1,7 @@
 <script type="text/javascript">
   RED.nodes.registerType('feedparser-plus', {
     category: 'parser',
-    color: "#C0DEED",
+    color: "#DEBD5C",
     defaults: {
       name: { value: "" },
       userAgent: { value: "Mozilla/5.0 (Node-RED)" },
@@ -12,7 +12,7 @@
     outputs: 2,
     outputLabels: ["New Articles", "Error"],
     icon: "feed.png",
-    paletteLabel: "RSS/Atom",
+    paletteLabel: "rss/atom",
     label() {
       return this.name || "feed parser";
     },
