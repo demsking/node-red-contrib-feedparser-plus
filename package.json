@@ -34,5 +34,24 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "kwp"
+  "author": "kwp",
+  "contributors": [
+    {
+      "name": "Sébastien Demanou",
+      "email": "demsking@gmail.com",
+      "url": "https://gitlab.com/demsking"
+    },
+    {
+      "name": "孔维鹏",
+      "url": "https://github.com/wpkong"
+    },
+    {
+      "name": "Ray",
+      "url": "https://github.com/RayPS"
+    },
+    {
+      "name": "Titus",
+      "url": "https://github.com/kwp"
+    }
+  ]
 }
