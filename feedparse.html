@@ -10,6 +10,7 @@
     },
     inputs: 1,
     outputs: 2,
+    outputLabels: ["New Articles", "Error"],
     icon: "feed.png",
     paletteLabel: "RSS/Atom",
     label() {
@@ -47,7 +48,7 @@
 
   <h3>Context Storage</h3>
   <p>This node remembers which articles it has already seen by storing that information in a Redis-based memory. This helps ensure that only new articles are sent, even if the feed is checked regularly or after a restart.</p>
-  
+
   <h3>Input</h3>
   <ul>
     <li><code>msg[feedField]</code>: RSS/Atom feed URL. Can be a <strong>string</strong> or an <strong>array of strings</strong>. Default is <code>msg.payload</code></li>
