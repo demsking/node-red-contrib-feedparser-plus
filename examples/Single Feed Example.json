@@ -1,0 +1,88 @@
+[
+    {
+        "id": "a1b2c3d4.123456",
+        "type": "tab",
+        "label": "Single Feed Example",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "b2c3d4e5.789012",
+        "type": "inject",
+        "z": "a1b2c3d4.123456",
+        "name": "Trigger every hour",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "3600",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "5",
+        "topic": "",
+        "payload": "https://example.com/feed.xml",
+        "payloadType": "str",
+        "x": 200,
+        "y": 200,
+        "wires": [
+            [
+                "c3d4e5f6.345678"
+            ]
+        ]
+    },
+    {
+        "id": "c3d4e5f6.345678",
+        "type": "feedparser-extended",
+        "z": "a1b2c3d4.123456",
+        "name": "RSS Parser",
+        "userAgent": "Node-RED Feed Parser",
+        "timeout": "30000",
+        "feedField": "payload",
+        "x": 400,
+        "y": 200,
+        "wires": [
+            [
+                "d4e5f6g7.901234"
+            ],
+            [
+                "e5f6g7h8.567890"
+            ]
+        ]
+    },
+    {
+        "id": "d4e5f6g7.901234",
+        "type": "debug",
+        "z": "a1b2c3d4.123456",
+        "name": "Show Articles",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "article",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 600,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "e5f6g7h8.567890",
+        "type": "debug",
+        "z": "a1b2c3d4.123456",
+        "name": "Show Errors",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 600,
+        "y": 240,
+        "wires": []
+    }
+]
