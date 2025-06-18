@@ -15,3 +15,5 @@ test
 .tmuxinator.yml
 *.tgz
 .vscode
+.prettierrc.json
+CONTRIBUTING.md
