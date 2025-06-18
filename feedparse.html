@@ -1,6 +1,6 @@
 <script type="text/javascript">
-  RED.nodes.registerType('feedparse-x', {
-    category: 'advanced-input',
+  RED.nodes.registerType('feedparser-extended', {
+    category: 'parser',
     color: "#C0DEED",
     defaults: {
       name: { value: "" },
@@ -21,7 +21,7 @@
   });
 </script>
 
-<script type="text/x-red" data-template-name="feedparse-x">
+<script type="text/x-red" data-template-name="feedparser-extended">
   <div class="form-row">
     <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
     <input type="text" id="node-input-name" placeholder="Name">
@@ -41,7 +41,7 @@
   </div>
 </script>
 
-<script type="text/x-red" data-help-name="feedparse-x">
+<script type="text/x-red" data-help-name="feedparser-extended">
   <h2>Feed Parse Node</h2>
   <p>Monitors an RSS/Atom feed and outputs new articles.</p>
 
