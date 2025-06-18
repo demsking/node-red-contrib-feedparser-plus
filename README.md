@@ -1,4 +1,4 @@
-node-red-contrib-feedparser-x
+node-red-contrib-feed
 ========================
 
 A modified version of [node-red-node-feedparser-2](https://github.com/rayps/node-red-contrib-feedparser-2) 
@@ -12,7 +12,7 @@ Install
 
 Run the following command in your Node-RED user directory - typically `~/.node-red`
 
-        npm install node-red-contrib-feedparser-x
+        npm install node-red-contrib-feed
         
 Edit `setting.js`, and search for `contextStorage`. Make some changes like following:
 
