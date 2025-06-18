@@ -32,7 +32,7 @@
   "homepage": "https://gitlab.com/demsking/node-red-contrib-feedparser-plus#readme",
   "main": "feedparse.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test/*.test.js"
   },
   "author": "kwp",
   "contributors": [
@@ -53,5 +53,10 @@
       "name": "Titus",
       "url": "https://github.com/kwp"
     }
-  ]
+  ],
+  "devDependencies": {
+    "mocha": "^11.7.0",
+    "node-red": "^4.0.9",
+    "node-red-node-test-helper": "^0.3.4"
+  }
 }
