@@ -1,36 +1,112 @@
-
-<script type="text/x-red" data-template-name="feedparse-x">
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
-    </div>
-</script>
-
-<script type="text/x-red" data-help-name="feedparse-x">
-    <p>Monitors an RSS/atom feed for new entries.</p>
-    <p>The <code>msg.topic</code> contains the original article link. The <code>msg.payload</code>
-    contains the description, and <code>msg.article</code> contains the complete article object,
-    which has properties such as <code>.title</code>, <code>.summary</code>, <code>.date</code> and so on.</p>
-</script>
-
 <script type="text/javascript">
-    RED.nodes.registerType('feedparse-x',{
-        category: 'advanced-input',
-        color:"#C0DEED",
-        defaults: {
-            name: {value:""},
-        },
-        inputs:1,
-        outputs:1,
-        icon: "feed.png",
-        paletteLabel: function() {
-            return this._("feedparse-x");
-        },
-        label: function() {
-            return this.name||this.url||this._("feedparsex");
-        },
-        labelStyle: function() {
-            return this.name?"node_label_italic":"";
-        }
-    });
+  RED.nodes.registerType('feedparser-extended', {
+    category: 'parser',
+    color: "#C0DEED",
+    defaults: {
+      name: { value: "" },
+      userAgent: { value: "Mozilla/5.0 (Node-RED)" },
+      timeout: { value: 10000 },
+      feedField: { value: "payload" }
+    },
+    inputs: 1,
+    outputs: 2,
+    outputLabels: ["New Articles", "Error"],
+    icon: "feed.png",
+    paletteLabel: "RSS/Atom",
+    label() {
+      return this.name || "feed parser";
+    },
+    labelStyle() {
+      return this.name ? "node_label_italic" : "";
+    }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="feedparser-extended">
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+  <div class="form-row">
+    <label for="node-input-feedField"><i class="fa fa-sign-in"></i> Feed URL Field</label>
+    <input type="text" id="node-input-feedField" placeholder="payload">
+    <p class="form-tips">May be a string or array of strings</p>
+  </div>
+  <div class="form-row">
+    <label for="node-input-userAgent"><i class="fa fa-cog"></i> User-Agent</label>
+    <input type="text" id="node-input-userAgent" placeholder="Mozilla/5.0 (Node-RED)">
+  </div>
+  <div class="form-row">
+    <label for="node-input-timeout"><i class="fa fa-clock-o"></i> Timeout (ms)</label>
+    <input type="number" id="node-input-timeout" placeholder="10000">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="feedparser-extended">
+  <h2>Feed Parse Node</h2>
+  <p>Monitors an RSS/Atom feed and outputs new articles.</p>
+
+  <h3>Context Storage</h3>
+  <p>This node remembers which articles it has already seen by storing that information in a Redis-based memory. This helps ensure that only new articles are sent, even if the feed is checked regularly or after a restart.</p>
+
+  <h3>Input</h3>
+  <ul>
+    <li><code>msg[feedField]</code>: RSS/Atom feed URL. Can be a <strong>string</strong> or an <strong>array of strings</strong>. Default is <code>msg.payload</code></li>
+    <li><code>msg.userAgent</code>: (Optional) Override the default User-Agent header</li>
+    <li><code>msg.timeout</code>: (Optional) Override the default request timeout in milliseconds</li>
+    <li><code>msg.init_send</code>: If true, all entries are sent on first fetch</li>
+    <li><code>msg.keep_size</code>: Max number of GUIDs to keep in memory (default 30)</li>
+  </ul>
+
+  <h3>Outputs</h3>
+  <ol>
+    <li><code>msg</code>: For each new article
+      <ul>
+        <li><code>msg.topic</code>: Article link</li>
+        <li><code>msg.payload</code>: Article description</li>
+        <li><code>msg.article</code>: Full article object</li>
+      </ul>
+    </li>
+    <li><code>msg</code>: Error output
+      <ul>
+        <li><code>msg.payload</code>: Error message string</li>
+      </ul>
+    </li>
+  </ol>
+
+  <h3>The Article Object</h3>
+  <p>The <code>msg.article</code> object contains detailed information about each feed entry:</p>
+  <ul>
+    <li><code>title</code>: Title of the article</li>
+    <li><code>description</code>: Often the full article content</li>
+    <li><code>summary</code>: Often an excerpt or summary of the article</li>
+    <li><code>link</code>: Link to the article</li>
+    <li><code>origlink</code>: Original link if a tracking link is used (e.g., FeedBurner)</li>
+    <li><code>permalink</code>: Derived from the RSS guid field if marked as permalink</li>
+    <li><code>date</code>: Most recent update timestamp</li>
+    <li><code>pubdate</code>: Original publish date</li>
+    <li><code>author</code>: Author of the article</li>
+    <li><code>guid</code>: Unique identifier for the article</li>
+    <li><code>comments</code>: URL to the article's comments section</li>
+    <li><code>image</code>: Object with <code>url</code> and <code>title</code> of an associated image</li>
+    <li><code>categories</code>: Array of category strings</li>
+    <li><code>source</code>: Object with <code>url</code> and <code>title</code> pointing to original source</li>
+    <li><code>enclosures</code>: Array of objects representing attachments (e.g., podcast files) with <code>url</code>, and optionally <code>type</code> and <code>length</code></li>
+    <li><code>meta</code>: Object containing feed metadata</li>
+  </ul>
+
+  <h3>Node Status</h3>
+  <ul>
+    <li><code>fetching: &lt;url&gt;</code>: Fetching the feed URL</li>
+    <li><code>parsing feed</code>: Parsing the feed content</li>
+    <li><code>&lt;n&gt; new articles</code>: Number of new articles emitted</li>
+    <li><code>no new articles</code>: No new articles found</li>
+    <li><code>no URL</code>: No URL was provided in the input</li>
+    <li><code>invalid URL</code>: Provided URL is invalid</li>
+    <li><code>fetch error</code>: Failed to fetch the feed</li>
+    <li><code>status &lt;code&gt;</code>: HTTP status error</li>
+    <li><code>stream error</code>: Error reading the stream</li>
+    <li><code>parse error</code>: Error parsing the feed</li>
+    <li><code>context error</code>: Error accessing stored data</li>
+  </ul>
 </script>

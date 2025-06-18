@@ -1,15 +1,13 @@
 {
   "name": "node-red-contrib-feedparser-x",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "A Node-RED node to get RSS Atom feeds. (persistent)",
   "dependencies": {
-    "feedparser": "^2.2.9",
-    "request": "^2.83.0",
-    "sha1": "^1.1.1"
+    "feedparser": "^2.2.10"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wpkong/node-red-contrib-feedparser-x.git"
+    "url": "git+https://gitlab.com/demsking/node-red-contrib-feedparser-extended.git"
   },
   "license": "Apache-2.0",
   "keywords": [
@@ -20,18 +18,40 @@
     "parse"
   ],
   "node-red": {
+    "version": ">=3.0.0",
     "nodes": {
-      "feedparse-x": "feedparse.js"
+      "feed": "feedparse.js"
     }
   },
-  "bugs": {
-    "url": "https://github.com/wpkong/node-red-contrib-feedparser-x/issues"
+  "engines": {
+    "node": ">=20"
   },
-  "homepage": "https://github.com/wpkong/node-red-contrib-feedparser-x#readme",
+  "bugs": {
+    "url": "https://gitlab.com/demsking/node-red-contrib-feedparser-extended/issues"
+  },
+  "homepage": "https://gitlab.com/demsking/node-red-contrib-feedparser-extended#readme",
   "main": "feedparse.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "kwp"
+  "author": "kwp",
+  "contributors": [
+    {
+      "name": "Sébastien Demanou",
+      "email": "demsking@gmail.com",
+      "url": "https://gitlab.com/demsking"
+    },
+    {
+      "name": "孔维鹏",
+      "url": "https://github.com/wpkong"
+    },
+    {
+      "name": "Ray",
+      "url": "https://github.com/RayPS"
+    },
+    {
+      "name": "Titus",
+      "url": "https://github.com/kwp"
+    }
+  ]
 }

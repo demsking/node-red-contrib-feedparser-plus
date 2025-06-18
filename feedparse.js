@@ -1,126 +1,170 @@
+// Copyright 2025 Sébastien Demanou
+// Copyright 2025 JS Foundation and other contributors, https://js.foundation/
+// Copyright 2013-2016 IBM Corp.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ==============================================================================
+// feedparse.js
 module.exports = function (RED) {
   "use strict";
-  let FeedParser = require("feedparser");
-  let request = require("request");
-  let url = require('url');
-  let sha1 = require('sha1');
+  const FeedParser = require("feedparser");
+  const { parse: parseUrl } = require("url");
+  const { createHash } = require("crypto");
+  const { Readable } = require("stream");
 
   function buildKey(url, key) {
-    return sha1(url) + "-" + key;
+    return createHash("sha1").update(url).digest("hex") + "-" + key;
   }
 
   function FeedParseNode(config) {
     RED.nodes.createNode(this, config);
-    let node = this;
+    const node = this;
 
-    var getFeed = function (msg) {
-      let init_send = msg.init_send || false;
-      let is_existent = true;
-      let keep_size = msg.keep_size || 30;
+    node.userAgent = config.userAgent || "Mozilla/5.0 (Node-RED)";
+    node.timeout = parseInt(config.timeout, 10) || 10000;
+    node.feedField = config.feedField || "payload";
 
-      if (!msg.payload) {
-        node.error(RED._("feedparsex.errors.invalidurl"));
+    const getFeedUrls = (msg) => {
+      const field = node.feedField;
+      const value = RED.util.getMessageProperty(msg, field);
+      if (!value) return [];
+      return Array.isArray(value) ? value : [value];
+    };
+
+    const fetchAndParse = async (feed_url, msg, is_existent, seen, keep_size, init_send) => {
+      node.status({ fill: "blue", shape: "dot", text: `fetching: ${feed_url}` });
+
+      let res;
+      try {
+        res = await fetch(feed_url, {
+          headers: {
+            "User-Agent": node.userAgent,
+            "Accept": "application/rss+xml,application/xml;q=0.9,*/*;q=0.8"
+          },
+          timeout: node.timeout
+        });
+      } catch (err) {
+        node.status({ fill: "red", shape: "ring", text: "fetch error" });
+        node.send([null, { payload: err.message }]);
         return;
       }
-      let feed_url = msg.payload;
-      let parsed_url = url.parse(feed_url);
-      if (!(parsed_url.host || (parsed_url.hostname && parsed_url.port)) && !parsed_url.isUnix) {
-        node.error(RED._("feedparsex.errors.invalidurl"));
+
+      if (!res.ok) {
+        node.status({ fill: "red", shape: "ring", text: `status ${res.status}` });
+        node.send([null, { payload: `Bad status code ${res.status}` }]);
         return;
       }
 
-      let seenKey = buildKey(feed_url, "seen");
+      node.status({ fill: "blue", shape: "dot", text: "parsing feed" });
 
-      let nodeContext = node.context();
-      nodeContext.get(seenKey, "redis", function (error, seen) {
-        // get feed seen table
-        if (error) {
-          node.error(error);
-          return;
-        }
-        is_existent = !!seen;
-        if (!seen) {
-          seen = {};
-        }
-        // request feed
-        var req = request(feed_url, {timeout: 10000, pool: false});
-        //req.setMaxListeners(50);
-        req.setHeader('user-agent', 'Mozilla/5.0 (Node-RED)');
-        req.setHeader('accept', 'text/html,application/xhtml+xml');
+      const stream = Readable.fromWeb(res.body, { objectMode: false });
+      const feedparser = new FeedParser();
 
-        var feedparser = new FeedParser();
+      stream.on("error", err => {
+        node.status({ fill: "red", shape: "ring", text: "stream error" });
+        node.send([null, { payload: err.message }]);
+      });
 
-        req.on('error', function (err) {
-          node.error(err);
-        });
+      feedparser.on("error", err => {
+        node.status({ fill: "red", shape: "ring", text: "parse error" });
+        node.send([null, { payload: err.message }]);
+      });
 
-        req.on('response', function (res) {
-          if (res.statusCode !== 200) {
-            node.warn(RED._("feedparsex.errors.badstatuscode") + " " + res.statusCode);
-          } else {
-            res.pipe(feedparser);
-          }
-        });
+      stream.pipe(feedparser);
 
-        feedparser.on('error', function (error) {
-          node.error(error);
-        });
-
-        feedparser.on('readable', function () {
-          let stream = this, article;
-
-          while (article = stream.read()) {  // jshint ignore:line
-            let guid = article.guid;
-            if (!(guid in seen) || (seen[guid].article_date !== 0 && seen[guid].article_date !== article.date.getTime())) {
-              seen[guid] = {
-                article_date: article.date ? article.date.getTime() : 0,
-                seen_date: new Date().getTime()
-              }
-              // is_existent denotes that there are not any cache in redis
-              // init_send denotes that message can be sent whenever cache is clear
-              //
-              if(!(!is_existent && !init_send)){
-                let data = JSON.parse(JSON.stringify(msg));
-                data.topic = article.origlink || article.link;
-                data.payload = article.description;
-                data.article = article;
-                node.send(data);
-              }
+      feedparser.on("readable", function () {
+        let articleCount = 0;
+        let article;
+        while ((article = this.read())) {
+          const guid = article.guid;
+          const isNew = !(guid in seen) || (seen[guid].article_date !== 0 && seen[guid].article_date !== article.date?.getTime());
+          if (isNew) {
+            seen[guid] = {
+              article_date: article.date?.getTime() || 0,
+              seen_date: Date.now()
+            };
+            if (is_existent || init_send) {
+              const outMsg = structuredClone(msg);
+              outMsg.topic = article.origlink || article.link;
+              outMsg.payload = article.description;
+              outMsg.article = article;
+              node.send([outMsg, null]);
+              articleCount++;
             }
           }
-        });
-
-        feedparser.on('meta', function (meta) {
-        });
-        feedparser.on('end', function () {
-          let seen_arr = [];
-          Object.keys(seen).forEach(k => {
-            seen_arr.push({
-              id: k,
-              article_date: seen[k].article_date,
-              seen_date: seen[k].seen_date
-            });
-          });
-          // sort from bottom to top
-          seen_arr.sort((a, b) => (a.article_date > b.article_date)? 1: -1);
-          // clear
-          seen = {};
-          seen_arr.slice(-keep_size).forEach(v => {
-            seen[v.id] = {
-              article_date: v.article_date,
-              seen_date: v.seen_date
-            };
-          });
-          // write back to redis
-          nodeContext.set(seenKey, seen, "redis");
-        });
+        }
+        if (articleCount > 0) {
+          node.status({ fill: "green", shape: "dot", text: `${articleCount} new articles` });
+        } else {
+          node.status({ fill: "grey", shape: "ring", text: "no new articles" });
+        }
       });
-    }
 
-    this.on("input", function (msg) {
-      getFeed(msg);
+      feedparser.on("end", function () {
+        const seen_arr = Object.entries(seen)
+          .map(([id, data]) => ({ id, ...data }))
+          .sort((a, b) => a.article_date - b.article_date)
+          .slice(-keep_size);
+
+        const trimmedSeen = Object.fromEntries(seen_arr.map(v => [
+          v.id, { article_date: v.article_date, seen_date: v.seen_date }
+        ]));
+
+        const seenKey = buildKey(feed_url, "seen");
+        node.context().set(seenKey, trimmedSeen, "redis");
+
+        setTimeout(() => node.status({}), 5000);
+      });
+    };
+
+    this.on("input", async function (msg) {
+      const init_send = msg.init_send || false;
+      const keep_size = msg.keep_size || 30;
+
+      const feedUrls = getFeedUrls(msg);
+      if (feedUrls.length === 0) {
+        node.status({ fill: "red", shape: "ring", text: "no URL" });
+        node.send([null, { payload: "Missing feed URL in message" }]);
+        return;
+      }
+
+      for (const feed_url of feedUrls) {
+        const parsed_url = parseUrl(feed_url);
+        if (!(parsed_url.host || (parsed_url.hostname && parsed_url.port)) && !parsed_url.isUnix) {
+          node.status({ fill: "red", shape: "ring", text: "invalid URL" });
+          node.send([null, { payload: "Invalid feed URL" }]);
+          continue;
+        }
+
+        const seenKey = buildKey(feed_url, "seen");
+
+        await new Promise(resolve => {
+          node.context().get(seenKey, "redis", async (err, seen) => {
+            if (err) {
+              node.status({ fill: "red", shape: "ring", text: "context error" });
+              node.send([null, { payload: err.message }]);
+              return resolve();
+            }
+
+            const is_existent = !!seen;
+            seen = seen || {};
+            await fetchAndParse(feed_url, msg, is_existent, seen, keep_size, init_send);
+            resolve();
+          });
+        });
+      }
     });
   }
 
-  RED.nodes.registerType("feedparse-x", FeedParseNode);
-}
+  RED.nodes.registerType("feedparser-extended", FeedParseNode);
+};

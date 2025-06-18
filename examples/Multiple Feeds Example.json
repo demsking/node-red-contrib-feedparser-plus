@@ -1,0 +1,88 @@
+[
+    {
+        "id": "f6g7h8i9.123456",
+        "type": "tab",
+        "label": "Multiple Feeds Example",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "g7h8i9j0.789012",
+        "type": "inject",
+        "z": "f6g7h8i9.123456",
+        "name": "Trigger every 2 hours",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "7200",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "5",
+        "topic": "",
+        "payload": "[\"https://news.example.com/rss\",\"https://blog.example.com/feed\",\"https://updates.example.com/atom.xml\"]",
+        "payloadType": "json",
+        "x": 270,
+        "y": 180,
+        "wires": [
+            [
+                "h8i9j0k1.345678"
+            ]
+        ]
+    },
+    {
+        "id": "h8i9j0k1.345678",
+        "type": "feedparser-extended",
+        "z": "f6g7h8i9.123456",
+        "name": "Multi-Feed Parser",
+        "userAgent": "Node-RED Multi-Feed Parser",
+        "timeout": "45000",
+        "feedField": "payload",
+        "x": 500,
+        "y": 180,
+        "wires": [
+            [
+                "i9j0k1l2.901234"
+            ],
+            [
+                "j0k1l2m3.567890"
+            ]
+        ]
+    },
+    {
+        "id": "i9j0k1l2.901234",
+        "type": "debug",
+        "z": "f6g7h8i9.123456",
+        "name": "Show Articles",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "article",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 730,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "j0k1l2m3.567890",
+        "type": "debug",
+        "z": "f6g7h8i9.123456",
+        "name": "Show Errors",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 730,
+        "y": 220,
+        "wires": []
+    }
+]
