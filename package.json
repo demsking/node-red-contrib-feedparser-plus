@@ -1,5 +1,5 @@
 {
-  "name": "node-red-contrib-feedparser-extended",
+  "name": "node-red-contrib-feedparser-plus",
   "version": "1.0.0",
   "description": "A Node-RED node to get RSS Atom feeds. (persistent)",
   "dependencies": {
@@ -7,7 +7,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/demsking/node-red-contrib-feedparser-extended.git"
+    "url": "git+https://gitlab.com/demsking/node-red-contrib-feedparser-plus.git"
   },
   "license": "Apache-2.0",
   "keywords": [
@@ -27,9 +27,9 @@
     "node": ">=20"
   },
   "bugs": {
-    "url": "https://gitlab.com/demsking/node-red-contrib-feedparser-extended/issues"
+    "url": "https://gitlab.com/demsking/node-red-contrib-feedparser-plus/issues"
   },
-  "homepage": "https://gitlab.com/demsking/node-red-contrib-feedparser-extended#readme",
+  "homepage": "https://gitlab.com/demsking/node-red-contrib-feedparser-plus#readme",
   "main": "feedparse.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

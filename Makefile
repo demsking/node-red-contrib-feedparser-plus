@@ -4,7 +4,7 @@ shell:
 	tmuxinator
 
 stop:
-	tmux kill-session -t node-red-contrib-feedparser-extended
+	tmux kill-session -t node-red-contrib-feedparser-plus
 
 lint:
 	pre-commit run --all-files
@@ -36,7 +36,7 @@ package: lint # test
 	npm pack
 
 publish: package
-	git commit package.* -m "Release $(PACKAGE_VERSION)"
+	# git commit package.* -m "Release $(PACKAGE_VERSION)"
 	npm publish --access public
 	git tag v$(PACKAGE_VERSION)
 	git push --tags origin main

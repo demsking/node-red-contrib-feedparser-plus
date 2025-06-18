@@ -1,4 +1,4 @@
-# Node-RED Feed Parser Extended
+# Node-RED Feed Parser Plus
 
 An enhanced and modernized fork of [node-red-contrib-feedparser-x](https://github.com/wpkong/node-red-contrib-feedparser-x).
 
@@ -19,7 +19,7 @@ persistent tracking of seen articles using Redis context storage.
 Run the following command in your Node-RED user directory (typically `~/.node-red`):
 
 ```bash
-npm install node-red-contrib-feedparser-extended
+npm install node-red-contrib-feedparser-plus
 ```
 
 Enable Redis context storage by editing your `settings.js`:

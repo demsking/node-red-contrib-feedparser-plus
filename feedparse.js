@@ -166,5 +166,5 @@ module.exports = function (RED) {
     });
   }
 
-  RED.nodes.registerType("feedparser-extended", FeedParseNode);
+  RED.nodes.registerType("feedparser-plus", FeedParseNode);
 };

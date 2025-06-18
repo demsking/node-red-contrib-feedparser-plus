@@ -34,7 +34,7 @@
     },
     {
         "id": "h8i9j0k1.345678",
-        "type": "feedparser-extended",
+        "type": "feedparser-plus",
         "z": "f6g7h8i9.123456",
         "name": "Multi-Feed Parser",
         "userAgent": "Node-RED Multi-Feed Parser",

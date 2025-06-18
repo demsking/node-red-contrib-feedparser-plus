@@ -1,8 +1,8 @@
-name: node-red-contrib-feedparser-extended
+name: node-red-contrib-feedparser-plus
 root: .
 
 # Optional tmux socket
-socket_name: node-red-contrib-feedparser-extended
+socket_name: node-red-contrib-feedparser-plus
 
 # Note that the pre and post options have been deprecated and will be replaced by
 # project hooks.

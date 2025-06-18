@@ -34,7 +34,7 @@
     },
     {
         "id": "c3d4e5f6.345678",
-        "type": "feedparser-extended",
+        "type": "feedparser-plus",
         "z": "a1b2c3d4.123456",
         "name": "RSS Parser",
         "userAgent": "Node-RED Feed Parser",
