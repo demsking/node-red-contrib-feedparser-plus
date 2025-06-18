@@ -96,10 +96,10 @@ The node provides runtime feedback via its status indicator:
 
 ## Contribute
 
-Please follow [CONTRIBUTING.md](./CONTRIBUTING.md).
+Please follow [CONTRIBUTING.md](https://gitlab.com/demsking/node-red-contrib-feedparser-plus/-/blob/main/CONTRIBUTING.md).
 
 ## License
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License.
-You may obtain a copy of the License at [LICENSE](./LICENSE).
+You may obtain a copy of the License at [LICENSE](https://gitlab.com/demsking/node-red-contrib-feedparser-plus/-/blob/main/LICENSE).
