@@ -1,9 +1,9 @@
 module.exports = function (RED) {
   "use strict";
-  let FeedParser = require("feedparser");
-  let request = require("request");
-  let url = require('url');
-  let sha1 = require('sha1');
+  const FeedParser = require("feedparser");
+  const { parse: parseUrl } = require("url");
+  const sha1 = require("sha1");
+  const { Readable } = require("stream");
 
   function buildKey(url, key) {
     return sha1(url) + "-" + key;
@@ -11,76 +11,77 @@ module.exports = function (RED) {
 
   function FeedParseNode(config) {
     RED.nodes.createNode(this, config);
-    let node = this;
+    const node = this;
 
-    var getFeed = function (msg) {
-      let init_send = msg.init_send || false;
+    const getFeed = async function (msg) {
+      const init_send = msg.init_send || false;
       let is_existent = true;
-      let keep_size = msg.keep_size || 30;
+      const keep_size = msg.keep_size || 30;
 
       if (!msg.payload) {
         node.error(RED._("feedparsex.errors.invalidurl"));
         return;
       }
-      let feed_url = msg.payload;
-      let parsed_url = url.parse(feed_url);
+
+      const feed_url = msg.payload;
+      const parsed_url = parseUrl(feed_url);
       if (!(parsed_url.host || (parsed_url.hostname && parsed_url.port)) && !parsed_url.isUnix) {
         node.error(RED._("feedparsex.errors.invalidurl"));
         return;
       }
 
-      let seenKey = buildKey(feed_url, "seen");
+      const seenKey = buildKey(feed_url, "seen");
+      const nodeContext = node.context();
 
-      let nodeContext = node.context();
-      nodeContext.get(seenKey, "redis", function (error, seen) {
-        // get feed seen table
+      nodeContext.get(seenKey, "redis", async function (error, seen) {
         if (error) {
           node.error(error);
           return;
         }
+
         is_existent = !!seen;
         if (!seen) {
           seen = {};
         }
-        // request feed
-        var req = request(feed_url, {timeout: 10000, pool: false});
-        //req.setMaxListeners(50);
-        req.setHeader('user-agent', 'Mozilla/5.0 (Node-RED)');
-        req.setHeader('accept', 'text/html,application/xhtml+xml');
 
-        var feedparser = new FeedParser();
-
-        req.on('error', function (err) {
+        let res;
+        try {
+          res = await fetch(feed_url, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Node-RED)",
+              "Accept": "text/html,application/xhtml+xml"
+            },
+            timeout: 10000
+          });
+        } catch (err) {
           node.error(err);
-        });
+          return;
+        }
 
-        req.on('response', function (res) {
-          if (res.statusCode !== 200) {
-            node.warn(RED._("feedparsex.errors.badstatuscode") + " " + res.statusCode);
-          } else {
-            res.pipe(feedparser);
-          }
-        });
+        if (!res.ok) {
+          node.warn(RED._("feedparsex.errors.badstatuscode") + " " + res.status);
+          return;
+        }
 
-        feedparser.on('error', function (error) {
-          node.error(error);
-        });
+        const stream = Readable.fromWeb(res.body, { objectMode: false });
+        const feedparser = new FeedParser();
 
-        feedparser.on('readable', function () {
-          let stream = this, article;
+        stream.on("error", err => node.error(err));
+        feedparser.on("error", err => node.error(err));
 
-          while (article = stream.read()) {  // jshint ignore:line
-            let guid = article.guid;
-            if (!(guid in seen) || (seen[guid].article_date !== 0 && seen[guid].article_date !== article.date.getTime())) {
+        stream.pipe(feedparser);
+
+        feedparser.on("readable", function () {
+          let article;
+          while ((article = this.read())) {
+            const guid = article.guid;
+            if (!(guid in seen) || (seen[guid].article_date !== 0 && seen[guid].article_date !== article.date?.getTime())) {
               seen[guid] = {
                 article_date: article.date ? article.date.getTime() : 0,
-                seen_date: new Date().getTime()
-              }
-              // is_existent denotes that there are not any cache in redis
-              // init_send denotes that message can be sent whenever cache is clear
-              //
-              if(!(!is_existent && !init_send)){
-                let data = JSON.parse(JSON.stringify(msg));
+                seen_date: Date.now()
+              };
+              if (!(!is_existent && !init_send)) {
+                const data = JSON.parse(JSON.stringify(msg));
                 data.topic = article.origlink || article.link;
                 data.payload = article.description;
                 data.article = article;
@@ -90,20 +91,15 @@ module.exports = function (RED) {
           }
         });
 
-        feedparser.on('meta', function (meta) {
-        });
-        feedparser.on('end', function () {
-          let seen_arr = [];
-          Object.keys(seen).forEach(k => {
-            seen_arr.push({
-              id: k,
-              article_date: seen[k].article_date,
-              seen_date: seen[k].seen_date
-            });
-          });
-          // sort from bottom to top
-          seen_arr.sort((a, b) => (a.article_date > b.article_date)? 1: -1);
-          // clear
+        feedparser.on("end", function () {
+          const seen_arr = Object.keys(seen).map(k => ({
+            id: k,
+            article_date: seen[k].article_date,
+            seen_date: seen[k].seen_date
+          }));
+
+          seen_arr.sort((a, b) => a.article_date - b.article_date);
+
           seen = {};
           seen_arr.slice(-keep_size).forEach(v => {
             seen[v.id] = {
@@ -111,11 +107,11 @@ module.exports = function (RED) {
               seen_date: v.seen_date
             };
           });
-          // write back to redis
+
           nodeContext.set(seenKey, seen, "redis");
         });
       });
-    }
+    };
 
     this.on("input", function (msg) {
       getFeed(msg);
@@ -123,4 +119,4 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType("feedparse-x", FeedParseNode);
-}
+};

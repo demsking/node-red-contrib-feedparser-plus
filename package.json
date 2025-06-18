@@ -4,7 +4,6 @@
   "description": "A Node-RED node to get RSS Atom feeds. (persistent)",
   "dependencies": {
     "feedparser": "^2.2.10",
-    "request": "^2.88.2",
     "sha1": "^1.1.1"
   },
   "repository": {
@@ -29,7 +28,6 @@
   },
   "homepage": "https://github.com/wpkong/node-red-contrib-feedparser-x#readme",
   "main": "feedparse.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
