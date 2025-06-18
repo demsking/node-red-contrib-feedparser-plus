@@ -2,11 +2,11 @@ module.exports = function (RED) {
   "use strict";
   const FeedParser = require("feedparser");
   const { parse: parseUrl } = require("url");
-  const sha1 = require("sha1");
+  const { createHash } = require("crypto");
   const { Readable } = require("stream");
 
   function buildKey(url, key) {
-    return sha1(url) + "-" + key;
+    return createHash("sha1").update(url).digest("hex") + "-" + key;
   }
 
   function FeedParseNode(config) {
