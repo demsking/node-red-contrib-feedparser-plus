@@ -18,9 +18,13 @@
     "parse"
   ],
   "node-red": {
+    "version": ">=3.0.0",
     "nodes": {
       "feed": "feedparse.js"
     }
+  },
+  "engines": {
+    "node": ">=20"
   },
   "bugs": {
     "url": "https://github.com/wpkong/node-red-contrib-feed/issues"
