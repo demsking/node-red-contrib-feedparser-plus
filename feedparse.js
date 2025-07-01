@@ -33,7 +33,7 @@ module.exports = function (RED) {
     node.timeout = parseInt(config.timeout, 10) || 10000;
     node.feedField = config.feedField || "payload";
 
-    const getFeedUrls = (msg) => {
+    function getFeedUrls(msg) {
       const field = node.feedField;
       const value = RED.util.getMessageProperty(msg, field);
 
@@ -42,9 +42,9 @@ module.exports = function (RED) {
       }
 
       return [];
-    };
+    }
 
-    const fetchAndParse = async (feed_url, msg, is_existent, seen, keep_size, init_send, send) => {
+    async function fetchAndParse(feed_url, msg, is_existent, seen, keep_size, init_send, send) {
       node.status({ fill: "blue", shape: "dot", text: `fetching: ${feed_url}` });
 
       let res;
@@ -58,7 +58,7 @@ module.exports = function (RED) {
           timeout: node.timeout
         });
       } catch (err) {
-        const errorMessage = "Failed to fetch feed: " + err.message;
+        const errorMessage = `Failed to fetch feed ${feed_url}: ${err.message}`;
 
         node.status({ fill: "red", shape: "ring", text: errorMessage });
         node.error(errorMessage, msg);
@@ -90,7 +90,7 @@ module.exports = function (RED) {
 
       feedparser.on("error", (error) => {
         node.status({ fill: "red", shape: "ring", text: "parse error" });
-        node.error("Feed parse error: " + error.message, msg);
+        node.error(`Feed parse error: ${error.message}`, msg);
         send([null, { payload: error.message }]);
       });
 
@@ -145,7 +145,7 @@ module.exports = function (RED) {
         node.context().set(seenKey, trimmedSeen, "redis");
         setTimeout(() => node.status({}), 5000);
       });
-    };
+    }
 
     this.on("input", async (msg, send, done) => {
       const init_send = msg.init_send || false;
@@ -163,7 +163,7 @@ module.exports = function (RED) {
         return;
       }
 
-      for (const feed_url of feedUrls) {
+      feedUrls.forEach(async (feed_url) => {
         if (!URL.canParse(feed_url)) {
           const errorMsg = "Invalid feed URL: " + feed_url;
 
@@ -171,7 +171,7 @@ module.exports = function (RED) {
           node.error(errorMsg, msg);
           send([null, { payload: errorMsg }]);
 
-          continue;
+          return;
         }
 
         const seenKey = buildKey(feed_url, "seen");
@@ -196,7 +196,7 @@ module.exports = function (RED) {
             resolve();
           });
         });
-      }
+      });
 
       done();
     });
